@@ -1,0 +1,8 @@
+{
+  "name": "math",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
