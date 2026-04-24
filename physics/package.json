@@ -1,5 +1,0 @@
-{
-  "name": "physics",
-  "private": true,
-  "workspaces": ["backend", "frontend"]
-}

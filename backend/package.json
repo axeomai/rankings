@@ -1,0 +1,20 @@
+{
+  "name": "@rankings/backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "fetch:math": "python3 scripts/build_database.py --discipline math",
+    "fetch:physics": "python3 scripts/build_database.py --discipline physics"
+  },
+  "dependencies": {
+    "pg": "^8.16.0",
+    "drizzle-orm": "^0.45.2"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.15.4",
+    "@types/node": "^20",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
+  }
+}
