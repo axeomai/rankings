@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
-import type { InstitutionResult } from "@rankings/backend/src/lib/rankings";
+import type { InstitutionSummary } from "@rankings/backend/src/lib/rankings";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,9 +14,10 @@ import InstitutionRow from "./InstitutionRow";
 import { cn } from "@/lib/utils";
 
 interface RankingsTableProps {
-  institutions: InstitutionResult[];
+  institutions: InstitutionSummary[];
   loading: boolean;
   searchQuery?: string;
+  fetchParams?: string;
 }
 
 const PAGE_SIZE = 50;
@@ -146,6 +147,7 @@ export default function RankingsTable({
   institutions,
   loading,
   searchQuery = "",
+  fetchParams = "",
 }: RankingsTableProps) {
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -203,6 +205,7 @@ export default function RankingsTable({
           key={inst.id}
           institution={inst}
           rank={startIdx + i + 1}
+          fetchParams={fetchParams}
         />
       ))}
 

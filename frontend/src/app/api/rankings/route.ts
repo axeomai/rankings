@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRankings, getCountries, getRegions } from "@rankings/backend/src/lib/rankings";
+import { getRankings, getCountries, getRegions, getFacultyForInstitution } from "@rankings/backend/src/lib/rankings";
 import { DISCIPLINES, DEFAULT_DISCIPLINE } from "@rankings/backend/src/lib/disciplines";
 
 export const dynamic = "force-dynamic";
@@ -28,6 +28,18 @@ export async function GET(req: NextRequest) {
       countries: await getCountries(schema),
       regions: await getRegions(schema),
     });
+  }
+
+  const facultyParam = searchParams.get("faculty");
+  if (facultyParam) {
+    try {
+      const instId = parseInt(facultyParam, 10);
+      const faculty = await getFacultyForInstitution(schema, instId, { areas, yearFrom, yearTo });
+      return NextResponse.json(faculty);
+    } catch (err) {
+      console.error(err);
+      return NextResponse.json({ error: "Failed to fetch faculty" }, { status: 500 });
+    }
   }
 
   try {

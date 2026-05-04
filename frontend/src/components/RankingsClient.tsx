@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { InstitutionResult } from "@rankings/backend/src/lib/rankings";
+import type { InstitutionSummary } from "@rankings/backend/src/lib/rankings";
 import { DISCIPLINES, getAllAreaIds } from "@rankings/backend/src/lib/disciplines";
 import type { AreaGroup } from "@rankings/backend/src/lib/disciplines";
 import { Slider } from "@/components/ui/slider";
@@ -57,10 +57,11 @@ export default function RankingsClient({ countries, disciplineId, title, subtitl
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortBy>("score");
 
-  const [institutions, setInstitutions] = useState<InstitutionResult[]>([]);
+  const [institutions, setInstitutions] = useState<InstitutionSummary[]>([]);
   const [loading, setLoading] = useState(true);
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fetchParamsRef = useRef<string>("");
 
   const fetchRankings = useCallback(async () => {
     setLoading(true);
@@ -69,10 +70,11 @@ export default function RankingsClient({ countries, disciplineId, title, subtitl
       params.set("areas", Array.from(selectedAreas).join(","));
     params.set("yearFrom", String(yearFrom));
     params.set("yearTo", String(yearTo));
+    fetchParamsRef.current = params.toString();
 
     try {
       const res = await fetch(`/api/rankings?${params.toString()}`);
-      const data: InstitutionResult[] = await res.json();
+      const data: InstitutionSummary[] = await res.json();
       setInstitutions(Array.isArray(data) ? data : []);
     } catch {
       setInstitutions([]);
@@ -275,6 +277,7 @@ export default function RankingsClient({ countries, disciplineId, title, subtitl
           institutions={filteredSorted}
           loading={loading}
           searchQuery={search}
+          fetchParams={fetchParamsRef.current}
         />
       </main>
 

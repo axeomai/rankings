@@ -1,23 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import type { InstitutionResult } from "@rankings/backend/src/lib/rankings";
-import { ChevronRight } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import type { InstitutionSummary, FacultyResult } from "@rankings/backend/src/lib/rankings";
+import { ChevronRight, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Flag from "./Flag";
 import { displayCountryName } from "@/lib/flags";
 import FacultyRow from "./FacultyRow";
 
 interface InstitutionRowProps {
-  institution: InstitutionResult;
+  institution: InstitutionSummary;
   rank: number;
+  /** Current filter params so faculty fetch matches the rankings view. */
+  fetchParams?: string;
 }
 
 export default function InstitutionRow({
   institution,
   rank,
+  fetchParams = "",
 }: InstitutionRowProps) {
   const [expanded, setExpanded] = useState(false);
+  const [faculty, setFaculty] = useState<FacultyResult[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const fetchFaculty = useCallback(async () => {
+    if (faculty !== null) return; // already loaded
+    setLoading(true);
+    try {
+      const sep = fetchParams ? "&" : "?";
+      const url = `/api/rankings?${fetchParams}${sep}faculty=${institution.id}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      setFaculty(Array.isArray(data) ? data : []);
+    } catch {
+      setFaculty([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [faculty, fetchParams, institution.id]);
+
+  useEffect(() => {
+    if (expanded && faculty === null && !loading) {
+      fetchFaculty();
+    }
+  }, [expanded, faculty, loading, fetchFaculty]);
+
+  // Reset cached faculty when filters change so re-expand fetches fresh data.
+  useEffect(() => {
+    setFaculty(null);
+  }, [fetchParams]);
 
   return (
     <div className="border-b border-border">
@@ -57,11 +89,22 @@ export default function InstitutionRow({
         </span>
       </button>
 
-      {expanded && institution.faculty.length > 0 && (
+      {expanded && (
         <div className="ml-10 border-l border-border">
-          {institution.faculty.map((f, i) => (
+          {loading && (
+            <div className="flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground">
+              <Loader2 className="size-3 animate-spin" />
+              Loading faculty…
+            </div>
+          )}
+          {faculty && faculty.length > 0 && faculty.map((f, i) => (
             <FacultyRow key={f.id} faculty={f} rank={i + 1} />
           ))}
+          {faculty && faculty.length === 0 && !loading && (
+            <div className="px-4 py-3 text-xs text-muted-foreground">
+              No faculty data available.
+            </div>
+          )}
         </div>
       )}
     </div>
