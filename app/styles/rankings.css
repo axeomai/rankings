@@ -1,0 +1,280 @@
+/* Rankings lane: the site's own classes, built only from the Thry tokens in globals.css. */
+
+.align-center {
+  text-align: center;
+}
+.page-lead {
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.spinner {
+  animation: spin 900ms linear infinite;
+}
+
+/* Header: the site's name set in the ink, beside the discipline tabs. */
+.site-link.site-brand {
+  color: var(--foreground);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.flag {
+  border: 1px solid color-mix(in oklch, var(--foreground) 12%, transparent);
+  border-radius: 2px;
+  background: var(--surface);
+}
+
+/* Search: a recessed field (.control) holding a bare input. */
+.search-field {
+  cursor: text;
+}
+.search-field-input {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  outline: none;
+}
+.search-field-input::placeholder {
+  color: var(--muted-foreground);
+}
+
+/* The native checkbox sits invisibly over the drawn box, so its focus ring is drawn on the box. */
+.checkbox-input:focus-visible + .checkbox {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.checkbox-input:hover + .checkbox:not([data-checked]) {
+  border-color: color-mix(in oklch, var(--line), var(--foreground) 25%);
+}
+
+/* Areas: a card of rows (p-1.5, so the card tier); a group of several areas is a section label over its indented rows. */
+.area-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--panel);
+}
+.area-panel-header {
+  border-block-end: 1px solid var(--line);
+}
+.area-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.area-group + .area-group,
+.area-row + .area-group {
+  margin-block-start: 4px;
+}
+.area-group-items {
+  padding-inline-start: 12px;
+}
+.area-row {
+  border-radius: var(--radius-item);
+  transition: background-color var(--motion-control-duration);
+}
+.area-row:hover {
+  background: color-mix(in oklch, var(--surface-hover) 55%, transparent);
+}
+.area-row-label {
+  cursor: pointer;
+  line-height: 1.35;
+  transition: color var(--motion-control-duration);
+}
+.area-row-toggle {
+  border: 0;
+  border-radius: var(--radius-inset);
+  background: transparent;
+  color: var(--muted-foreground);
+  transition:
+    background-color var(--motion-control-duration),
+    color var(--motion-control-duration);
+}
+.area-row-toggle:hover {
+  background: var(--surface-hover);
+  color: var(--foreground);
+}
+/* Venues hang under the label: past the 16px box, its 10px gap, and the row's 8px inset. */
+.area-venues {
+  margin: 0;
+  padding: 0 8px 0 34px;
+  list-style: none;
+}
+.area-venues li {
+  padding-block: 2px;
+  line-height: 1.4;
+}
+.area-venues li:last-child {
+  padding-block-end: 8px;
+}
+
+/* Leaderboard: four columns shared by the head, every row, and the skeleton. */
+.leaderboard-grid {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr) 4rem 3.25rem;
+  column-gap: 12px;
+}
+@media (min-width: 640px) {
+  .leaderboard-grid {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 5rem 4.5rem;
+  }
+}
+/* The list is one surface-tier card; the top three rows' rank rules run down its edge. */
+.leaderboard-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: var(--background);
+  overflow: hidden;
+}
+.leaderboard-card > .leaderboard-head {
+  border-block-end: 1px solid var(--line);
+  background: var(--panel);
+}
+.leaderboard-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.institution-toggle {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.institution-toggle:focus-visible {
+  outline-offset: -2px;
+}
+.institution-chevron {
+  transition: transform var(--motion-control-duration) var(--motion-ease);
+}
+.leaderboard-score {
+  font-weight: 600;
+}
+.leaderboard-results {
+  transition: opacity var(--motion-fade-duration) var(--motion-ease);
+}
+.leaderboard-stale {
+  opacity: 0.55;
+}
+
+/* Faculty open under their institution, starting at the name column, their score and paper columns aligned with the institution's. */
+.faculty-panel {
+  padding-inline-start: calc(12px + 2.25rem + 12px);
+}
+@media (min-width: 640px) {
+  .faculty-panel {
+    padding-inline-start: calc(12px + 2.75rem + 12px);
+  }
+}
+.faculty-row {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 4rem 3.25rem;
+  column-gap: 12px;
+}
+@media (min-width: 640px) {
+  .faculty-row {
+    grid-template-columns: 1.75rem minmax(0, 1fr) 5rem 4.5rem;
+  }
+}
+.faculty-head {
+  border-block-end: 1px solid color-mix(in oklch, var(--line) 60%, transparent);
+}
+.faculty-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.faculty-list > li + li {
+  border-block-start: 1px solid color-mix(in oklch, var(--line) 45%, transparent);
+}
+.faculty-area-score {
+  opacity: 0.75;
+}
+
+/* Mobile filters: the count of changed filters on the button beside the search, the platform selects inside the drawer, and the page held still while the drawer is open. */
+.badge.filter-count {
+  border-radius: 9999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 10px;
+}
+.native-select {
+  appearance: none;
+  -webkit-appearance: none;
+  text-overflow: ellipsis;
+}
+html:has(dialog.drawer[open]) {
+  overflow: hidden;
+}
+
+/* Home: the hero sits on the shader under a scrim of the ground, so the type always reads; the sections below are plain. */
+.home-hero {
+  border-block-end: 1px solid var(--line);
+}
+.home-hero-scrim {
+  background:
+    radial-gradient(ellipse 60% 55% at 50% 50%, color-mix(in oklch, var(--background) 72%, transparent), transparent 100%),
+    linear-gradient(to bottom, transparent 55%, color-mix(in oklch, var(--background) 85%, transparent));
+}
+.home-title {
+  font-size: clamp(36px, 6vw, 60px);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  text-wrap: balance;
+}
+.home-lead {
+  font-size: 18px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.home-section {
+  padding-block: 72px 8px;
+  scroll-margin-top: 16px;
+}
+.home-section:last-child {
+  padding-block-end: 72px;
+}
+.home-heading {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
+}
+.home-body {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.home-step-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.75rem;
+}
+.home-fact + .home-fact {
+  border-block-start: 1px solid var(--line);
+}
+.home-fact dd {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Terms and Privacy: plain reading text. */
+.legal-prose {
+  font-size: 15px;
+  line-height: 1.7;
+}
+.legal-prose > * {
+  margin-block: 0;
+}
+.legal-prose > * + * {
+  margin-block-start: 1em;
+}
+.legal-prose h2 {
+  margin-block-start: 2em;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.legal-prose h2 + p {
+  margin-block-start: 0.5em;
+}

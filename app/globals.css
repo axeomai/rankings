@@ -1,0 +1,1117 @@
+@import "tailwindcss";
+/* Thry UI core, from the kit's globals.css: the tokens, the six palettes, edge lighting, and the components this app renders. Selectors for library-only states (data-preview-state, the edge treatments, field tones) are left out, and .menu-content also takes Radix Popover's transform origin so a popover shares the menu surface. The app's lane stylesheet (rankings.css) owns its own classes and reads these tokens. */
+@import "./styles/rankings.css";
+
+@theme {
+  --color-*: initial;
+}
+@theme inline {
+  --font-sans: var(--font-proxima-nova), var(--font-inter), Arial, sans-serif;
+}
+
+/* Palettes. Thry's dark (the default) and light themes, each a full copy of the same token set, so neither inherits a value from the other. lib/themes.ts names them; html carries data-theme (the palette) and data-mode (light or dark). Components never key a style on a palette's name: a mode-specific tweak keys on data-mode, and everything else reads these tokens. `[data-palette="id"]` applies a palette to one element and its children. */
+:root,
+:root[data-theme="dark"],
+[data-palette="dark"] {
+  color-scheme: dark;
+  --background: oklch(0.1344 0 0);
+  --panel: oklch(0.18 0 0);
+  --surface: oklch(0.24 0 0);
+  --surface-hover: oklch(0.28 0 0);
+  --foreground: oklch(0.98481 0 0);
+  --muted-foreground: oklch(0.71186 0 0);
+  --line: oklch(0.3 0 0);
+  --focus: oklch(0.87091 0 0);
+  --accent: oklch(0.72 0.12 250);
+  --on-accent: oklch(0.16 0 0);
+  --secondary: oklch(0.72 0.12 290);
+  --on-secondary: oklch(0.16 0 0);
+  --success: oklch(0.74 0.15 150);
+  --warning: oklch(0.8 0.15 80);
+  --danger: oklch(0.74 0.16 25);
+  --control-highlight: rgb(255 255 255 / 0.12);
+  --control-shadow: rgb(0 0 0 / 0.4);
+  --overlay: rgb(0 0 0 / 0.65);
+  --selection: var(--foreground);
+  --selection-foreground: var(--background);
+  --scrollbar: var(--line);
+  --hue-grey: oklch(0.72 0 0);
+  --hue-red: oklch(0.72 0.17 25);
+  --hue-orange: oklch(0.76 0.16 50);
+  --hue-amber: oklch(0.82 0.15 82);
+  --hue-green: oklch(0.76 0.16 150);
+  --hue-teal: oklch(0.78 0.12 190);
+  --hue-blue: oklch(0.72 0.13 250);
+  --hue-indigo: oklch(0.68 0.16 278);
+  --hue-purple: oklch(0.72 0.17 305);
+  --hue-pink: oklch(0.74 0.17 350);
+  --auth-shader-base: var(--background);
+  --auth-shader-mid: color-mix(in oklch, var(--panel) 70%, var(--secondary) 30%);
+  --auth-shader-tone: color-mix(in oklch, var(--accent) 65%, var(--background));
+  --auth-shader-light: color-mix(in oklch, var(--foreground) 55%, var(--accent));
+}
+/* Light: neutral grays with white cards and a blue accent. */
+:root[data-theme="light"],
+[data-palette="light"] {
+  color-scheme: light;
+  --background: oklch(0.94271 0 0);
+  --panel: oklch(0.975 0 0);
+  --surface: oklch(1 0 0);
+  --surface-hover: oklch(0.96 0 0);
+  --foreground: oklch(0.14051 0.00437 285.82);
+  --muted-foreground: oklch(0.5 0 0);
+  --line: oklch(0.86 0 0);
+  --focus: oklch(0.35 0 0);
+  --accent: oklch(0.52 0.16 250);
+  --on-accent: oklch(1 0 0);
+  --secondary: oklch(0.5 0.17 290);
+  --on-secondary: oklch(1 0 0);
+  --success: oklch(0.5 0.14 150);
+  --warning: oklch(0.62 0.14 75);
+  --danger: oklch(0.5 0.17 25);
+  --control-highlight: rgb(255 255 255 / 0.95);
+  --control-shadow: rgb(0 0 0 / 0.1);
+  --overlay: rgb(0 0 0 / 0.65);
+  --selection: var(--foreground);
+  --selection-foreground: var(--background);
+  --scrollbar: var(--line);
+  --hue-grey: oklch(0.5 0 0);
+  --hue-red: oklch(0.55 0.2 25);
+  --hue-orange: oklch(0.6 0.17 50);
+  --hue-amber: oklch(0.6 0.15 80);
+  --hue-green: oklch(0.55 0.16 150);
+  --hue-teal: oklch(0.55 0.11 190);
+  --hue-blue: oklch(0.52 0.17 255);
+  --hue-indigo: oklch(0.5 0.19 278);
+  --hue-purple: oklch(0.54 0.2 305);
+  --hue-pink: oklch(0.58 0.2 350);
+  --auth-shader-base: var(--background);
+  --auth-shader-mid: color-mix(in oklch, var(--panel) 70%, var(--secondary) 30%);
+  --auth-shader-tone: color-mix(in oklch, var(--accent) 65%, var(--background));
+  --auth-shader-light: color-mix(in oklch, var(--foreground) 55%, var(--accent));
+}
+/* Tone names. A component that takes a tone names it primary, success, or failure: primary is the accent and failure is the danger tone. Declared beside every palette so a swatch resolves them in its own colors. */
+:root,
+[data-palette] {
+  --primary: var(--accent);
+  --on-primary: var(--on-accent);
+  --failure: var(--danger);
+}
+/* The stroke of a focused or open field: the focus color at half strength, so an active field reads without a bright outline. Buttons keep the full --focus for their offset ring. */
+:root,
+[data-palette] {
+  --focus-field: color-mix(in srgb, var(--focus) 50%, transparent);
+}
+
+:root {
+  --radius: 6px;
+  /* Nested corners are concentric: a container is as round as its children plus the gap between their edges. --radius names the leaf (buttons, fields, rows); popovers pad 4px inside a 1px border, dialogs and cards pad 16px. min() keeps a container no rounder than twice its children. */
+  --radius-gap-popover: 5px;
+  --radius-gap-tray: 9px;
+  --radius-gap-card: 13px;
+  --radius-gap-surface: 17px;
+  --radius-item: var(--radius);
+  --radius-popover: min(
+    calc(var(--radius) * 2),
+    calc(var(--radius) + var(--radius-gap-popover))
+  );
+  --radius-tray: min(
+    calc(var(--radius) * 2),
+    calc(var(--radius) + var(--radius-gap-tray))
+  );
+  --radius-card: min(
+    calc(var(--radius) * 2),
+    calc(var(--radius) + var(--radius-gap-card))
+  );
+  --radius-surface: min(
+    calc(var(--radius) * 2),
+    calc(var(--radius) + var(--radius-gap-surface))
+  );
+  /* Things nested inside a leaf (badges, kbd, checkboxes, inline code) sit 4px in. */
+  --radius-inset: max(calc(var(--radius) * 0.66), calc(var(--radius) - 4px));
+  --control-height: 36px;
+  --button-top: color-mix(in oklch, var(--surface), white 5%);
+  --button-lower-edge: color-mix(
+    in srgb,
+    var(--control-shadow) 25%,
+    transparent
+  );
+  --field-inner-shadow: color-mix(
+    in srgb,
+    var(--control-shadow) 60%,
+    transparent
+  );
+  --field-inner-light: color-mix(
+    in srgb,
+    var(--control-highlight) 55%,
+    transparent
+  );
+  --field-top: color-mix(in oklch, var(--surface) 75%, var(--background));
+  --overlay-blur: 8px;
+  --modal-shadow: calc(var(--light-x) * 12) calc(var(--light-y) * 12) 48px rgb(0 0 0 / 0.35);
+  --menu-shadow: calc(var(--light-x) * 8) calc(var(--light-y) * 8) 24px var(--control-shadow);
+  --popover-shadow:
+    var(--lit-drop), calc(var(--light-x) * 12) calc(var(--light-y) * 12) 32px var(--control-shadow);
+  --motion-control-duration: 120ms;
+  --pane-motion-duration: 240ms;
+  --motion-fade-duration: 200ms;
+  --motion-distance: 8px;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Edge lighting. One key light at --light-angle (clockwise from the top) lights every raised control, recessed field, and lit card. The vector (--light-x, --light-y) is the 1px offset toward the far edge; every lit treatment is built from it. Declared on every element so an element that turns its own --light-angle recomputes its own edges. */
+@property --light-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+@property --light-rim {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+*,
+::before,
+::after,
+::backdrop {
+  --light-x: calc(sin(var(--light-angle)) * -1px);
+  --light-y: calc(cos(var(--light-angle)) * 1px);
+  --lit-key: var(--control-highlight);
+  --lit-rim-edge: color-mix(in srgb, var(--lit-key) calc(var(--light-rim) * 100%), var(--button-lower-edge));
+  --lit-raised:
+    inset var(--light-x) var(--light-y) 0 var(--lit-key),
+    inset calc(var(--light-x) * -1) calc(var(--light-y) * -1) 0 var(--lit-rim-edge);
+  --lit-recessed:
+    inset var(--light-x) var(--light-y) 3px var(--field-inner-shadow),
+    inset calc(var(--light-x) * -1) calc(var(--light-y) * -1) 0 var(--field-inner-light);
+  --lit-well: inset var(--light-x) var(--light-y) 2px var(--field-inner-shadow);
+  --lit-pressed: inset var(--light-x) var(--light-y) 2px var(--control-shadow);
+  --lit-drop: var(--light-x) var(--light-y) 2px var(--control-shadow);
+  --lit-drop-hover: calc(var(--light-x) * 2) calc(var(--light-y) * 2) 4px var(--control-shadow);
+  --lit-direction: calc(var(--light-angle) + 180deg);
+  --lit-rim-surface: color-mix(in oklch, var(--surface), white calc(var(--light-rim) * 6%));
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: var(--line);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar) transparent;
+  }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+  }
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+  button,
+  select {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+  }
+  ::selection {
+    background: var(--selection);
+    color: var(--selection-foreground);
+  }
+}
+
+.muted {
+  color: var(--muted-foreground);
+}
+.button,
+.control {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background-color: var(--surface);
+  color: var(--foreground);
+  font-size: 14px;
+  line-height: 1;
+}
+/* Buttons. Every look is composed from per-button tokens, so the variants, tones, and states only set tokens: --button-fill is the plate, --button-top the lit end of its gradient, --button-press the flat plate while pressed, --button-edge the stroke, --button-light the inner lights, --button-drop the cast shadow, and --button-tone the tone's color. */
+.button {
+  --button-tone: var(--primary);
+  --button-fill: var(--surface);
+  --button-press: var(--surface-hover);
+  --button-edge: color-mix(in oklch, var(--line), var(--foreground) 4%);
+  --button-light: var(--lit-raised);
+  --button-drop: var(--lit-drop);
+  font-weight: 600;
+  border-color: var(--button-edge);
+  background-color: var(--button-fill);
+  background-image: linear-gradient(
+    var(--lit-direction),
+    var(--button-top),
+    var(--button-fill) 85%,
+    var(--lit-rim-surface)
+  );
+  box-shadow:
+    var(--button-light),
+    var(--button-drop);
+  transition:
+    background-color var(--motion-control-duration),
+    border-color var(--motion-control-duration),
+    box-shadow var(--motion-control-duration);
+  transition-timing-function: var(--motion-ease);
+}
+.button:hover:not(:disabled) {
+  --button-top: color-mix(in oklch, var(--surface-hover), white 5%);
+  --button-edge: color-mix(in oklch, var(--line), var(--foreground) 15%);
+  --button-drop: var(--lit-drop-hover);
+  background-color: var(--surface-hover);
+  border-color: var(--button-edge);
+  box-shadow:
+    var(--button-light),
+    var(--button-drop);
+}
+.button:active:not(:disabled) {
+  --button-light: var(--lit-pressed);
+  --button-drop: 0 0 #0000;
+  background-color: var(--button-press);
+  background-image: none;
+  box-shadow:
+    var(--button-light),
+    var(--button-drop);
+}
+.button[data-variant="quiet"] {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--muted-foreground);
+}
+.button[data-variant="quiet"]:hover:not(:disabled),
+.button[data-variant="quiet"][data-state="open"] {
+  background: var(--surface-hover);
+  border-color: transparent;
+  color: var(--foreground);
+  box-shadow: none;
+}
+/* Filled: variant="primary" is the plate filled with its tone, lit by the same edge-lighting tokens as a raised button, with --on-primary for its label. */
+.button[data-variant="primary"] {
+  --button-fill: var(--button-tone);
+  --button-press: color-mix(in oklch, var(--button-tone), white 8%);
+  --button-top: color-mix(in oklch, var(--button-tone), white 14%);
+  --button-edge: color-mix(in oklch, var(--button-tone), black 18%);
+  --lit-key: color-mix(in oklch, var(--button-tone), white 40%);
+  --lit-rim-surface: color-mix(in oklch, var(--button-tone), white calc(var(--light-rim) * 12%));
+  color: var(--on-primary);
+}
+.button[data-variant="primary"]:hover:not(:disabled) {
+  --button-top: color-mix(in oklch, var(--button-tone), white 22%);
+  --button-edge: color-mix(in oklch, var(--button-tone), black 10%);
+  background-color: color-mix(in oklch, var(--button-tone), white 8%);
+}
+.button:disabled,
+.control:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Fields are recessed: they reverse the raised button's lighting. --field-edge is the stroke at rest, on hover, and while focused or open (then --focus-field). */
+.control {
+  --field-edge: var(--line);
+  border-color: var(--field-edge);
+  background-image: linear-gradient(
+    var(--lit-direction),
+    var(--field-top),
+    var(--surface) 80%
+  );
+  box-shadow: var(--lit-recessed);
+  transition:
+    border-color var(--motion-control-duration) var(--motion-ease),
+    box-shadow var(--motion-control-duration) var(--motion-ease);
+}
+.control:hover:not(:disabled) {
+  --field-edge: color-mix(in oklch, var(--line), var(--foreground) 10%);
+}
+/* Fields do not get the focus ring; their own stroke takes --focus-field. */
+.control:is(:focus-visible, :focus-within):not(:disabled) {
+  outline: none;
+  --field-edge: var(--focus-field);
+}
+.control option {
+  background: var(--surface);
+  color: var(--foreground);
+}
+.select-trigger[data-placeholder] .select-value {
+  color: var(--muted-foreground);
+}
+.select-value > * {
+  min-width: 0;
+}
+/* An open trigger reads as active the same way a focused field does. */
+.control.select-trigger[data-state="open"] {
+  --field-edge: var(--focus-field);
+}
+.select-trigger[data-state="open"] .select-chevron {
+  transform: rotate(180deg);
+}
+.select-chevron {
+  transition: transform var(--motion-control-duration) var(--motion-ease);
+}
+/* Popovers (select lists, action menus) share one surface: a translucent blurred panel with the container radius, a lit top edge, and a lifted shadow. */
+.select-content,
+.menu-content {
+  --popover: color-mix(in srgb, var(--panel) 94%, transparent);
+  background: var(--popover);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  color: var(--foreground);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-popover);
+  box-shadow: var(--popover-shadow);
+}
+.select-content {
+  transform-origin: var(--radix-select-content-transform-origin);
+  animation: popover-enter var(--motion-fade-duration) var(--motion-ease);
+}
+.select-content[data-state="closed"] {
+  animation: popover-exit var(--motion-fade-duration) var(--motion-ease);
+}
+.select-item {
+  border-radius: var(--radius-item);
+  font-size: 14px;
+  outline: none;
+  transition: background-color var(--motion-control-duration);
+}
+.select-group,
+.menu-item,
+.menu-label {
+  padding-inline: max(10px, var(--radius-item));
+}
+/* The check keeps its own lane at the end. */
+.select-item {
+  padding-inline-start: max(10px, var(--radius-item));
+  padding-inline-end: calc(max(10px, var(--radius-item)) + 22px);
+}
+.select-item-check {
+  inset-inline-end: max(8px, calc(var(--radius-item) - 2px));
+}
+.select-separator,
+.menu-separator {
+  margin-inline: calc(var(--radius-popover) / 2);
+}
+.select-item[data-highlighted] {
+  background: var(--surface-hover);
+}
+.select-item[data-state="checked"] .select-item-label {
+  font-weight: 500;
+}
+.select-item[data-disabled] {
+  opacity: 0.45;
+}
+.select-item-check {
+  color: var(--foreground);
+}
+.select-group {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.select-separator {
+  height: 1px;
+  background: var(--line);
+}
+.select-scroll {
+  color: var(--muted-foreground);
+  background: var(--popover);
+}
+@keyframes popover-enter {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-0.5 * var(--motion-distance))) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes popover-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(calc(-0.5 * var(--motion-distance))) scale(0.98);
+  }
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.checkbox {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-inset);
+  background: var(--surface);
+  color: var(--background);
+  box-shadow: var(--lit-well);
+  transition:
+    background-color var(--motion-control-duration),
+    border-color var(--motion-control-duration);
+}
+.checkbox[data-checked] {
+  border-color: var(--foreground);
+  background: var(--foreground);
+  box-shadow: none;
+}
+.empty-state {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-surface);
+}
+.chip {
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: var(--surface);
+  color: var(--muted-foreground);
+  font-weight: 500;
+  transition:
+    background-color var(--motion-control-duration),
+    color var(--motion-control-duration);
+}
+.chip:hover {
+  background: var(--surface-hover);
+  color: var(--foreground);
+}
+.chip[aria-pressed="true"] {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+/* Tabs: a recessed tray of flat labels with one lifted plate. Trays of pills are concentric by their own padding: a tray's corner is the leaf radius plus its padding, and the plate inside is that corner minus the padding. */
+.tab-strip,
+.segmented-tray {
+  --tray-pad: 4px;
+  --tray-radius: min(calc(var(--radius) * 2), calc(var(--radius) + var(--tray-pad)));
+  --tray-inner: max(0px, calc(var(--tray-radius) - var(--tray-pad)));
+  border-radius: var(--tray-radius);
+}
+.segmented-tray {
+  --tray-pad: 2px;
+}
+.tab-strip {
+  background: color-mix(in oklch, var(--background) 70%, var(--surface));
+  box-shadow: var(--lit-well);
+}
+.tab {
+  border: 0;
+  border-radius: var(--tray-inner);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color var(--motion-control-duration),
+    color var(--motion-control-duration),
+    box-shadow var(--motion-control-duration);
+}
+.tab:hover {
+  color: var(--foreground);
+}
+.tab[aria-selected="true"],
+.tab[aria-current="page"] {
+  background: var(--surface);
+  color: var(--foreground);
+  font-weight: 600;
+  box-shadow:
+    var(--lit-drop),
+    0 0 0 1px color-mix(in oklch, var(--line) 60%, transparent);
+}
+.tab:focus-visible {
+  outline-offset: -2px;
+}
+/* Segmented pills: a recessed tray of small labels with the chosen one lifted like the selected tab. */
+.segmented-tray {
+  background: color-mix(in oklch, var(--background) 70%, var(--surface));
+  box-shadow: var(--lit-well);
+}
+.segmented-pill {
+  border: 0;
+  border-radius: var(--tray-inner);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-weight: 500;
+  transition:
+    background-color var(--motion-control-duration),
+    color var(--motion-control-duration),
+    box-shadow var(--motion-control-duration);
+}
+.segmented-pill:hover:not(:disabled) {
+  color: var(--foreground);
+}
+.segmented-pill[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--foreground);
+  box-shadow:
+    var(--lit-drop),
+    0 0 0 1px color-mix(in oklch, var(--line) 60%, transparent);
+}
+
+/* Action menus (Radix dropdown). */
+.menu-content {
+  transform-origin: var(--radix-dropdown-menu-content-transform-origin, var(--radix-popover-content-transform-origin));
+  animation: popover-enter var(--motion-fade-duration) var(--motion-ease);
+}
+/* No exit animation: a closing menu that lingers keeps its dismiss layer alive. */
+.menu-content[data-state="closed"] {
+  animation: none;
+  opacity: 0;
+}
+.menu-item {
+  border-radius: var(--radius-item);
+  font-size: 14px;
+  outline: none;
+  transition: background-color var(--motion-control-duration);
+}
+.menu-item > svg {
+  color: var(--muted-foreground);
+  transition: color var(--motion-control-duration);
+}
+.menu-item[data-highlighted] {
+  background: var(--surface-hover);
+}
+.menu-item[data-highlighted] > svg {
+  color: var(--foreground);
+}
+.menu-separator {
+  height: 1px;
+  background: var(--line);
+}
+.menu-label {
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+.menu-check {
+  color: var(--foreground);
+}
+
+/* Thry pillar and subject colors. */
+:root {
+  --learn: oklch(0.686046 0.173418 248.528);
+  --solve: oklch(0.600058 0.211121 17.2061);
+  --research: oklch(0.749274 0.24747 143.409);
+  --mathematics: oklch(0.937091 0.198832 105.01);
+  --physics: oklch(0.701674 0.322491 328.363);
+  --computer-science: oklch(0.905399 0.15455 194.769);
+}
+/* On a light ground the product's bright pillar and subject colors fall near 2:1, so each is deepened until it reads as small text at 4.5:1 on every light palette's grounds, keeping its hue. */
+:root[data-mode="light"] {
+  --learn: oklch(0.5 0.16 248.5);
+  --solve: oklch(0.525 0.19 17.2);
+  --research: oklch(0.485 0.16 143.4);
+  --mathematics: oklch(0.5 0.115 88);
+  --physics: oklch(0.53 0.22 328);
+  --computer-science: oklch(0.485 0.1 200);
+}
+
+/* Thry's site header and footer around public pages. */
+.site-header {
+  border-bottom: 1px solid var(--line);
+  background: var(--background);
+}
+.site-link {
+  border: 0;
+  background: transparent;
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+  text-decoration: none;
+  transition:
+    color var(--motion-control-duration),
+    background-color var(--motion-control-duration);
+}
+.site-link:hover {
+  color: var(--foreground);
+}
+.thry-site-footer {
+  border-top: 1px solid var(--line);
+  background: var(--background);
+}
+.thry-site-footer .site-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Disclosures remain mounted while their intrinsic height animates. Motion preferences set the shared duration to zero. */
+.disclosure-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    grid-template-rows var(--pane-motion-duration) var(--motion-ease),
+    opacity var(--pane-motion-duration) var(--motion-ease),
+    visibility 0s linear var(--pane-motion-duration);
+}
+.disclosure-body[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* Unit headings read as small section labels; the chevron sits at the end. */
+.unit-heading {
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition:
+    background-color var(--motion-control-duration),
+    color var(--motion-control-duration);
+}
+.unit-heading:hover {
+  color: var(--foreground);
+}
+.unit-heading:focus-visible {
+  outline-offset: -2px;
+}
+.unit-chevron {
+  transition: transform var(--pane-motion-duration) var(--motion-ease);
+}
+.unit-chevron-closed {
+  transform: rotate(-90deg);
+}
+
+/* Clamp: text held to --clamp-lines lines with the browser's own ellipsis. */
+.clamp {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+}
+.clamp[data-lines="1"] {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.clamp:not([data-lines="1"]) {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--clamp-lines);
+  overflow-wrap: anywhere;
+}
+
+/* Type scale helpers; TSX must not carry Tailwind text utilities. */
+.type-lead {
+  font-size: 17px;
+}
+.type-small {
+  font-size: 13px;
+}
+.type-base {
+  font-size: 14px;
+}
+.type-tiny {
+  font-size: 12px;
+}
+.type-micro {
+  font-size: 11px;
+}
+.align-right {
+  text-align: right;
+}
+.align-start {
+  text-align: start;
+}
+.align-end {
+  text-align: end;
+}
+.badge {
+  border-radius: var(--radius-inset);
+  background: var(--surface-hover);
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+}
+.badge-mono {
+  font-family: ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+/* A toned badge is its tone on an 18% tint of itself; on the light palettes its label leans a fifth toward the ink. */
+.badge[data-tone] {
+  --badge-tone: var(--muted-foreground);
+  background: color-mix(in oklch, var(--badge-tone) 18%, transparent);
+  color: var(--badge-tone);
+}
+:where(:root[data-mode="light"]) .badge[data-tone] {
+  color: color-mix(in oklch, var(--badge-tone) 80%, var(--foreground));
+}
+.badge:is([data-tone="accent"], [data-tone="primary"]) {
+  --badge-tone: var(--accent);
+}
+.badge[data-tone="success"] {
+  --badge-tone: var(--success);
+}
+.section-label {
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+/* Avatars: initials on a hue chosen by the name, so a person is one color everywhere. The disc is lit like a raised control. */
+.avatar {
+  --avatar: var(--hue-blue);
+  --lit-key: rgb(255 255 255 / 0.28);
+  --button-lower-edge: rgb(0 0 0 / 0.18);
+  border-radius: 9999px;
+  background-color: color-mix(in oklch, var(--avatar) 82%, var(--panel));
+  background-image: linear-gradient(
+    var(--lit-direction),
+    color-mix(in oklch, var(--avatar), white 16%),
+    transparent 75%
+  );
+  box-shadow: var(--lit-raised);
+  color: white;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.18);
+}
+.avatar[data-tone="0"] { --avatar: var(--hue-blue); }
+.avatar[data-tone="1"] { --avatar: var(--hue-teal); }
+.avatar[data-tone="2"] { --avatar: var(--hue-purple); }
+.avatar[data-tone="3"] { --avatar: var(--hue-orange); }
+.avatar[data-tone="4"] { --avatar: var(--hue-green); }
+.avatar[data-tone="5"] { --avatar: var(--hue-pink); }
+.avatar[data-tone="6"] { --avatar: var(--hue-indigo); }
+.avatar[data-tone="7"] { --avatar: var(--hue-amber); }
+.person-link {
+  color: var(--foreground);
+  text-decoration: none;
+}
+.person-link:hover {
+  color: var(--accent);
+  text-decoration: none;
+}
+/* Stat strip: a label over a large figure. */
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.stat-strip {
+  border-block: 1px solid var(--line);
+}
+.stat-strip-cell + .stat-strip-cell {
+  border-inline-start: 1px solid
+    color-mix(in oklch, var(--line) 60%, transparent);
+}
+/* Thry leaderboard: hairline-divided rows whose top three take gold, silver, and bronze as a 2px rule, a faint tint, and the rank's color; statistics are a hairline grid of cells. */
+.leaderboard-row {
+  --rank-tone: transparent;
+  border-inline-start: 2px solid var(--rank-tone);
+  background: color-mix(in oklch, var(--rank-tone) 4%, transparent);
+  transition: background-color var(--motion-control-duration);
+}
+.leaderboard-row[data-rank="1"] {
+  --rank-tone: var(--hue-amber);
+}
+.leaderboard-row[data-rank="2"] {
+  --rank-tone: color-mix(in oklch, var(--muted-foreground), var(--foreground) 25%);
+}
+.leaderboard-row[data-rank="3"] {
+  --rank-tone: var(--hue-orange);
+}
+.leaderboard-row:hover {
+  background: color-mix(in oklch, var(--surface-hover) 70%, transparent);
+}
+.leaderboard-list > li + li {
+  border-block-start: 1px solid color-mix(in oklch, var(--line) 60%, transparent);
+}
+.leaderboard-head {
+  color: var(--muted-foreground);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  user-select: none;
+}
+.leaderboard-rank {
+  color: var(--muted-foreground);
+}
+.leaderboard-row[data-rank] .leaderboard-rank {
+  color: var(--rank-tone);
+  font-weight: 600;
+}
+/* The light palettes' amber and orange sit near 3.3:1 as small text, so the rank figure leans a fifth toward the ink there. */
+:root[data-mode="light"] .leaderboard-row[data-rank] .leaderboard-rank {
+  color: color-mix(in oklch, var(--rank-tone) 80%, var(--foreground));
+}
+.leaderboard-row:not([data-rank]) .leaderboard-name {
+  font-weight: 400;
+}
+.leaderboard-stat {
+  color: var(--muted-foreground);
+}
+.leaderboard-row[data-rank] .leaderboard-stat {
+  color: var(--foreground);
+  font-weight: 500;
+}
+.stat-strip.leaderboard-stats {
+  gap: 1px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-surface);
+  background: color-mix(in oklch, var(--line) 60%, transparent);
+  overflow: hidden;
+}
+.leaderboard-stats .stat-strip-cell {
+  background: var(--background);
+  border-inline-start: 0;
+}
+.skeleton {
+  border-radius: var(--radius);
+  background: var(--surface);
+  animation: pulse 1.6s var(--motion-ease) infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Site navigation: quiet links, regular weight, the current page at full strength. */
+.header-nav-trigger {
+  font-weight: 400;
+}
+.header-nav-trigger[aria-current="page"] {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+/* The shader backdrop draws the palette through the --auth-shader-* tokens each palette sets: base from the ground, mid from the panel and the secondary color, tone from the accent, a light from the foreground. The gradient here is what shows before the first frame or without WebGL. */
+.auth-shader {
+  background:
+    radial-gradient(
+      ellipse at 30% 20%,
+      color-mix(in oklch, var(--accent) 35%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 70% 80%,
+      color-mix(in oklch, var(--secondary) 22%, transparent),
+      transparent 55%
+    ),
+    var(--panel);
+}
+
+/* Numbered steps on a rail. */
+.steps {
+  counter-reset: step;
+}
+.step {
+  counter-increment: step;
+}
+.step-rail::before {
+  content: "";
+  position: absolute;
+  top: 26px;
+  bottom: -2px;
+  left: 50%;
+  width: 1px;
+  background: var(--line);
+  transform: translateX(-50%);
+}
+.step:last-child .step-rail::before {
+  display: none;
+}
+.step-dot {
+  border-radius: 9999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--foreground);
+}
+.step-dot::before {
+  content: counter(step);
+}
+
+/* Compact text-led cards borrow the buttons' top light and pressed depth at lower contrast. */
+.lib-card {
+  --lib-card-highlight: color-mix(
+    in oklch,
+    var(--control-highlight) 65%,
+    transparent
+  );
+  --lib-card-shadow: color-mix(
+    in oklch,
+    var(--control-shadow) 55%,
+    transparent
+  );
+  --lit-key: var(--lib-card-highlight);
+  overflow-wrap: anywhere;
+  border: 0;
+  border-radius: var(--radius-surface);
+  background-color: var(--panel);
+  background-image: linear-gradient(
+    var(--lit-direction),
+    color-mix(in oklch, var(--button-top) 35%, transparent),
+    transparent 85%
+  );
+  color: var(--foreground);
+  box-shadow:
+    var(--lit-raised),
+    var(--light-x) var(--light-y) 2px var(--lib-card-shadow);
+  transition:
+    background-color var(--motion-control-duration),
+    box-shadow var(--motion-control-duration);
+  transition-timing-function: var(--motion-ease);
+}
+.lib-card:hover,
+.lib-card:focus-visible {
+  background-color: color-mix(in oklch, var(--surface-hover) 55%, var(--panel));
+  box-shadow:
+    var(--lit-raised),
+    calc(var(--light-x) * 2) calc(var(--light-y) * 2) 4px var(--lib-card-shadow);
+}
+.lib-card:active {
+  background-image: none;
+  box-shadow: inset var(--light-x) var(--light-y) 2px var(--lib-card-shadow);
+}
+.lib-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.lib-card-description {
+  color: var(--muted-foreground);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.lib-card-footer {
+  color: var(--muted-foreground);
+}
+.lib-card-arrow {
+  color: var(--muted-foreground);
+  opacity: 0.65;
+  transition:
+    opacity var(--motion-control-duration),
+    color var(--motion-control-duration);
+}
+.lib-card:hover .lib-card-arrow,
+.lib-card:focus-visible .lib-card-arrow {
+  opacity: 1;
+  color: var(--foreground);
+}
+
+/* Dialogs: the plain title, and the backdrop every modal dims the page with. */
+.dialog-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+dialog::backdrop {
+  background: var(--overlay);
+  -webkit-backdrop-filter: blur(var(--overlay-blur));
+  backdrop-filter: blur(var(--overlay-blur));
+  opacity: 0;
+  transition:
+    opacity var(--motion-fade-duration) var(--motion-ease),
+    display var(--motion-fade-duration) allow-discrete,
+    overlay var(--motion-fade-duration) allow-discrete;
+}
+dialog:is([open], :popover-open)::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  dialog:is([open], :popover-open)::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Drawers: sheets that slide from an edge. Every sheet carries a grip on its inner edge; while it is held the sheet follows the pointer with no transition, and on release the transition takes it from there, back to rest or out past its edge. */
+.drawer {
+  --drawer-x: 0%;
+  --drawer-y: 0%;
+  --drawer-drag-x: 0px;
+  --drawer-drag-y: 0px;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--panel);
+  color: var(--foreground);
+  box-shadow: var(--modal-shadow);
+  translate: calc(var(--drawer-x) + var(--drawer-drag-x)) calc(var(--drawer-y) + var(--drawer-drag-y));
+  opacity: 1;
+  transition:
+    translate var(--pane-motion-duration) var(--motion-ease),
+    opacity var(--pane-motion-duration) var(--motion-ease),
+    display var(--pane-motion-duration) allow-discrete,
+    overlay var(--pane-motion-duration) allow-discrete;
+}
+.drawer[data-side="bottom"] {
+  border-width: 1px 0 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+}
+.drawer:not([open], :popover-open) {
+  pointer-events: none;
+  opacity: 0;
+}
+.drawer[data-side="bottom"]:not([open], :popover-open) {
+  --drawer-y: 100%;
+}
+@starting-style {
+  .drawer[data-side="bottom"]:is([open], :popover-open) {
+    --drawer-y: 100%;
+    opacity: 0;
+  }
+}
+.drawer[data-dragging] {
+  transition: none;
+  cursor: grabbing;
+  user-select: none;
+}
+.drawer-grip {
+  cursor: grab;
+}
+.drawer[data-dragging] .drawer-grip {
+  cursor: grabbing;
+}
+.drawer-handle {
+  border-radius: 9999px;
+  background: color-mix(in oklch, var(--muted-foreground) 45%, transparent);
+}
+.drawer-header {
+  border-bottom: 1px solid var(--line);
+}
+.drawer-footer {
+  border-top: 1px solid var(--line);
+}
+
+/* Explicit Full is an override; System is resolved before paint and tracks OS changes. */
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion]) {
+    --pane-motion-duration: 0ms;
+    --motion-fade-duration: 0ms;
+    --motion-distance: 0px;
+  }
+}
